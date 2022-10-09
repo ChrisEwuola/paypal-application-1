@@ -17,7 +17,7 @@ pipeline{
                 sh "mvn clean package"
             }
         }
-        stage('3CodeQuality'){
+       /* stage('3CodeQuality'){
             steps{
                 sh "echo 'Perfoming CodeQualityAnalysis' "
                 sh "mvn sonar:sonar"
@@ -56,6 +56,7 @@ pipeline{
               Thanks.
                Afolabi''', recipientProviders: [buildUser(), contributor(), developers()], subject: 'success', to: 'paypal-team@gmail.com'
         }
-    }
+    } */
     
+}
 }

@@ -1,0 +1,61 @@
+pipeline{
+    agent any
+    tools{
+        maven "maven3.8.6"
+    }
+    stages {
+        stage('1Getcode'){
+            steps{
+                sh "echo 'cloning the latest application version' "
+             git 'https://github.com/ChrisEwuola/paypal-application-1'
+            }
+        }
+        stage('2Test+Build'){
+            steps{
+                sh "echo 'running JUnit-test-cases' "
+                sh "echo 'testing must passed to create artifacts ' "
+                sh "mvn clean package"
+            }
+        }
+        stage('3CodeQuality'){
+            steps{
+                sh "echo 'Perfoming CodeQualityAnalysis' "
+                sh "mvn sonar:sonar"
+            }
+        }
+        stage('4 uploadToNexus'){
+            steps{
+                sh "mvn deploy"
+            }
+        }
+        stage('5 deploy2prod'){
+            steps{
+               deploy adapters: [tomcat8(credentialsId: 'tomcatcredentials', path: '', url: 'http://13.57.217.99:8080/')], contextPath: null, war: 'target/*war'
+            }
+        }
+    }
+    post{
+        always{
+            emailext body: '''Hey guys
+          please always check status.
+
+           Thanks.
+           Afolabi''', recipientProviders: [buildUser(), contributor(), developers()], subject: 'success', to: 'paypal-team@gmail.com'
+        }
+        success{
+            emailext body: '''Hey guys
+              good job build and deployment is successful.
+
+               Thanks.
+                Afolabi''', recipientProviders: [buildUser(), contributor(), developers()], subject: 'success', to: 'paypal-team@gmail.com'
+        }
+        failure{
+            emailext body: '''Hey guys
+             Build fail, please resolve issues.
+
+              Thanks.
+               Afolabi''', recipientProviders: [buildUser(), contributor(), developers()], subject: 'success', to: 'paypal-team@gmail.com'
+        }
+    }
+    
+}
